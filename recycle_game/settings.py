@@ -1,9 +1,10 @@
+from os import environ
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
-PORT = 8000
-URL = '127.0.0.1'
+URL = environ.get('URL', '0.0.0.0')
+PORT = int(environ.get('PORT', 8000))
 
 URL_PREFIX = f'http://{URL}:{PORT}/'
 

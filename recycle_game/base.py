@@ -12,7 +12,9 @@ def require_http_methods(request_method_list, error_handler):
             if request.command not in request_method_list:
                 return error_handler(request, *args, **kwargs)
             return func(request, *args, **kwargs)
+
         return inner
+
     return decorator
 
 

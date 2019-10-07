@@ -16,8 +16,8 @@ class SimpleRequestHandler(BaseHTTPRequestHandler):
 
 def run(server_class=HTTPServer, handler_class=BaseHTTPRequestHandler, url=URL,
         port=PORT):
+    handler = server_class((url, port), handler_class)
     try:
-        handler = server_class((url, port), handler_class)
         handler.serve_forever()
     except KeyboardInterrupt:
         print('Stopped')
