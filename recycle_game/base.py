@@ -12,9 +12,16 @@ def require_http_methods(request_method_list, error_handler):
             if request.command not in request_method_list:
                 return error_handler(request, *args, **kwargs)
             return func(request, *args, **kwargs)
-
         return inner
+    return decorator
 
+
+def encode_view_result(encoding):
+    def decorator(func):
+        @wraps(func)
+        def inner(request, *args, **kwargs):
+            return func(request, *args, **kwargs).encode(encoding)
+        return inner
     return decorator
 
 
@@ -32,4 +39,4 @@ def process_static(request):
     path = Path(BASE_DIR, STATIC_URL, *filename)
     if path.exists():
         send_headers(request, content_type=guess_type(request.path)[0])
-        return path.read_text('utf-8')
+        return path.read_bytes()

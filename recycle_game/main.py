@@ -11,7 +11,7 @@ class SimpleRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         body_content = urls.get(self.path, process_static)(self) \
                        or not_found(self)
-        self.wfile.write(body_content.encode('utf-8'))
+        self.wfile.write(body_content)
 
 
 def run(server_class=HTTPServer, handler_class=BaseHTTPRequestHandler, url=URL,
