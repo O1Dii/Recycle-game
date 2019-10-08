@@ -140,8 +140,8 @@ function game(canvas, hearts, scoreTitle, gameOver, tryAgain) {
   });
 
   window.addEventListener('touchmove', e => {
-    Body.setPosition(basket, Vector.create(e.clientX, basket.position.y));
-    Body.setPosition(triangle, Vector.create(e.clientX, basket.position.y));
+    Body.setPosition(basket, Vector.create(e.touches[0].clientX, basket.position.y));
+    Body.setPosition(triangle, Vector.create(e.touches[0].clientX, basket.position.y));
   });
 
   tryAgain.addEventListener('click', e => {
