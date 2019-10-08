@@ -51,7 +51,7 @@ function game(canvas, hearts, scoreTitle, gameOver, tryAgain) {
     isStatic: true,
     render: {
       sprite: {
-        texture: '../static/basket.png',
+        texture: '../static/img/basket.png',
         xOffset: -0.17,
         yOffset: -0.05,
         xScale: 0.05,
