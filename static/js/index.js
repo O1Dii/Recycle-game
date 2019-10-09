@@ -9,6 +9,43 @@ const Engine = Matter.Engine,
 
 let score = 0;
 let life = 5;
+const defaultSpawnSpeed = 2000;
+let currentSpawnSpeed = 2000;
+
+const items = [
+  {
+    w: 20,
+    h: 20,
+    options: {
+      good: false,
+      render: {
+        sprite: {
+          texture: '../static/img/can.png',
+          xOffset: -0.17,
+          yOffset: -0.05,
+          xScale: 0.05,
+          yScale: 0.05,
+        },
+      },
+    },
+  },
+  {
+    w: 20,
+    h: 20,
+    options: {
+      good: true,
+      render: {
+        sprite: {
+          texture: '../static/img/cheetos.png',
+          xOffset: -0.17,
+          yOffset: -0.05,
+          xScale: 0.05,
+          yScale: 0.05,
+        },
+      },
+    },
+  },
+];
 
 window.onload = () => {
   const canvas = document.getElementById('root');
@@ -25,8 +62,6 @@ window.onload = () => {
 function game(canvas, hearts, scoreTitle, gameOver, highestScore, tryAgain) {
   const engine = Engine.create();
   let highestScoreNumber = localStorage.getItem('highestScore');
-  const defaultSpawnSpeed = 2000;
-  let currentSpawnSpeed = 2000;
 
   render = Render.create({
     canvas: canvas,
@@ -59,7 +94,7 @@ function game(canvas, hearts, scoreTitle, gameOver, highestScore, tryAgain) {
     defaultSpawnSpeed,
   );
 
-  let increasingSpeedInterval = setInterval(() => {
+  setInterval(() => {
     clearInterval(interval);
     currentSpawnSpeed /= 1.2;
 
@@ -68,6 +103,33 @@ function game(canvas, hearts, scoreTitle, gameOver, highestScore, tryAgain) {
       currentSpawnSpeed,
     );
   }, 10000);
+
+  const decrLifes = () => {
+    life -= 1;
+
+    if (!life) {
+      gameOver.className = '';
+
+      if (score > highestScoreNumber || !highestScoreNumber) {
+        localStorage.setItem('highestScore', score);
+        highestScoreNumber = score;
+      }
+
+      highestScore.innerHTML = 'Your highest score: ' + highestScoreNumber;
+    }
+
+    if (life > -1) {
+      hearts[hearts.length - life - 1].className = 'heart hidden';
+    }
+  };
+
+  const incrScore = () => {
+    if (life > -1) {
+      score += 1;
+    }
+
+    scoreTitle.innerHTML = 'Your score: ' + score;
+  };
 
   Matter.Events.on(engine, 'collisionStart', ({ pairs }) => {
     pairs.forEach(({ bodyA, bodyB }) => {
@@ -78,27 +140,14 @@ function game(canvas, hearts, scoreTitle, gameOver, highestScore, tryAgain) {
         bodyA != triangle &&
         bodyB != triangle
       ) {
-        if (bodyA != ground) {
-          Matter.World.remove(engine.world, bodyA);
+        const targetObject = bodyA != ground ? bodyA : bodyB;
+
+        Matter.World.remove(engine.world, targetObject);
+
+        if (targetObject.good) {
+          decrLifes();
         } else {
-          Matter.World.remove(engine.world, bodyB);
-        }
-
-        life -= 1;
-
-        if (!life) {
-          gameOver.className = '';
-
-          if (score > highestScoreNumber || !highestScoreNumber) {
-            localStorage.setItem('highestScore', score);
-            highestScoreNumber = score;
-          }
-
-          highestScore.innerHTML = 'Your highest score: ' + highestScoreNumber;
-        }
-
-        if (life > -1) {
-          hearts[hearts.length - life - 1].className = 'heart hidden';
+          incrScore();
         }
 
         return;
@@ -111,20 +160,16 @@ function game(canvas, hearts, scoreTitle, gameOver, highestScore, tryAgain) {
         bodyA != ground &&
         bodyB != ground
       ) {
-        if (bodyA != basket && bodyA != triangle) {
-          Matter.World.remove(engine.world, bodyA);
+        const targetObject =
+          bodyA != basket && bodyA != triangle ? bodyA : bodyB;
+
+        Matter.World.remove(engine.world, targetObject);
+
+        if (targetObject.good) {
+          incrScore();
         } else {
-          Matter.World.remove(engine.world, bodyB);
+          decrLifes();
         }
-        if (bodyB != basket && bodyB != triangle) {
-          Matter.World.remove(engine.world, bodyB);
-        }
-
-        if (life > -1) {
-          score += 1;
-        }
-
-        scoreTitle.innerHTML = 'Your score: ' + score;
       }
     });
   });
@@ -177,6 +222,19 @@ function game(canvas, hearts, scoreTitle, gameOver, highestScore, tryAgain) {
   });
 }
 
+function createRandomItem(width) {
+  const chosenItem = items[Math.round(Math.random() * items.length - 0.5)];
+  const object = Bodies.rectangle(
+    Math.random() * width,
+    10,
+    chosenItem.w,
+    chosenItem.h,
+    chosenItem.options,
+  );
+
+  return object;
+}
+
 function createBase(height, width) {
   const drawHeight = height > width ? height * 0.9 : height;
   const groundHeight = screen.height - drawHeight;
@@ -184,7 +242,7 @@ function createBase(height, width) {
   const groundObject = Bodies.rectangle(
     width / 2,
     drawHeight,
-    width,
+    width + 60,
     groundHeight,
     {
       isStatic: true,
@@ -237,7 +295,7 @@ function intervalFunction(interval, engine, triangle, width) {
     return;
   }
 
-  const box = Bodies.rectangle(Math.random() * width, 10, 20, 20);
+  const box = createRandomItem(width);
   World.addBody(engine.world, box);
   World.remove(engine.world, triangle);
   World.addBody(engine.world, triangle);
