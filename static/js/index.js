@@ -28,15 +28,15 @@ const items = [
     },
   },
   {
-    w: 20,
-    h: 20,
+    w: 25,
+    h: 25,
     options: {
       good: true,
       render: {
         sprite: {
           texture: '../static/img/cheetos.png',
-          xScale: 0.05,
-          yScale: 0.05,
+          xScale: 0.07,
+          yScale: 0.07,
         },
       },
     },
