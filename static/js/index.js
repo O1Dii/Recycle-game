@@ -21,8 +21,6 @@ const items = [
       render: {
         sprite: {
           texture: '../static/img/can.png',
-          xOffset: -0.17,
-          yOffset: -0.05,
           xScale: 0.05,
           yScale: 0.05,
         },
@@ -37,10 +35,120 @@ const items = [
       render: {
         sprite: {
           texture: '../static/img/cheetos.png',
-          xOffset: -0.17,
-          yOffset: -0.05,
           xScale: 0.05,
           yScale: 0.05,
+        },
+      },
+    },
+  },
+  {
+    w: 25,
+    h: 20,
+    options: {
+      good: true,
+      render: {
+        sprite: {
+          texture: '../static/img/banana.png',
+          xScale: 0.07,
+          yScale: 0.07,
+        },
+      },
+    },
+  },
+  {
+    w: 25,
+    h: 20,
+    options: {
+      good: true,
+      render: {
+        sprite: {
+          texture: '../static/img/breakfast.png',
+          xScale: 0.01,
+          yScale: 0.01,
+        },
+      },
+    },
+  },
+  {
+    w: 25,
+    h: 20,
+    options: {
+      good: true,
+      render: {
+        sprite: {
+          texture: '../static/img/burger.png',
+          xScale: 0.08,
+          yScale: 0.08,
+        },
+      },
+    },
+  },
+  {
+    w: 20,
+    h: 20,
+    options: {
+      good: false,
+      render: {
+        sprite: {
+          texture: '../static/img/coffee.png',
+          xScale: 0.01,
+          yScale: 0.01,
+        },
+      },
+    },
+  },
+  {
+    w: 15,
+    h: 20,
+    options: {
+      good: true,
+      render: {
+        sprite: {
+          texture: '../static/img/cola.png',
+          xScale: 0.03,
+          yScale: 0.03,
+        },
+      },
+    },
+  },
+  {
+    w: 15,
+    h: 20,
+    options: {
+      good: false,
+      render: {
+        sprite: {
+          texture: '../static/img/cup.png',
+          xScale: 0.05,
+          yScale: 0.05,
+        },
+      },
+    },
+  },
+  {
+    w: 15,
+    h: 20,
+    options: {
+      good: false,
+      render: {
+        sprite: {
+          texture: '../static/img/cup2.png',
+          xScale: 0.05,
+          yScale: 0.05,
+        },
+      },
+    },
+  },
+  {
+    w: 15,
+    h: 20,
+    options: {
+      good: true,
+      render: {
+        sprite: {
+          texture: '../static/img/sprite.png',
+          xScale: 0.07,
+          yScale: 0.07,
         },
       },
     },
