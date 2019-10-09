@@ -16,13 +16,17 @@ window.onload = () => {
   const hearts = document.getElementsByClassName('heart');
   const score = document.getElementById('score-title');
   const gameOver = document.getElementById('game-over-container');
+  const highestScore = document.getElementById('highest-score');
   const tryAgain = document.getElementById('again');
 
-  game(canvas, hearts, score, gameOver, tryAgain);
+  game(canvas, hearts, score, gameOver, highestScore, tryAgain);
 };
 
-function game(canvas, hearts, scoreTitle, gameOver, tryAgain) {
+function game(canvas, hearts, scoreTitle, gameOver, highestScore, tryAgain) {
   const engine = Engine.create();
+  let highestScoreNumber = localStorage.getItem('highestScore');
+  const defaultSpawnSpeed = 2000;
+  let currentSpawnSpeed = 2000;
 
   render = Render.create({
     canvas: canvas,
@@ -35,47 +39,15 @@ function game(canvas, hearts, scoreTitle, gameOver, tryAgain) {
       width: window.innerWidth,
     },
   });
-  const ground = Bodies.rectangle(
-    render.canvas.width / 2,
+
+  const { groundObject, basketObject, triangleObject } = createBase(
     render.canvas.height,
     render.canvas.width,
-    60,
-    {
-      isStatic: true,
-      render: {
-        // fillStyle: 'transparent',
-      },
-    },
   );
-  const triangle = Bodies.polygon(50, render.canvas.height - 50, 3, 10, {
-    isStatic: true,
-    render: {
-      sprite: {
-        texture: '../static/img/basket.png',
-        xOffset: -0.17,
-        yOffset: -0.05,
-        xScale: 0.05,
-        yScale: 0.05,
-      },
-    },
-  });
-  const basket = Bodies.fromVertices(
-    50,
-    render.canvas.height - 50,
-    [
-      Vector.create(30, 530),
-      Vector.create(32, 530),
-      Vector.create(46, 565),
-      Vector.create(54, 565),
-      Vector.create(68, 530),
-      Vector.create(70, 530),
-      Vector.create(55, 570),
-      Vector.create(45, 570),
-    ],
-    {
-      isStatic: true,
-    },
-  );
+
+  let ground = groundObject,
+    basket = basketObject,
+    triangle = triangleObject;
 
   World.add(engine.world, [ground, basket, triangle]);
 
@@ -84,8 +56,18 @@ function game(canvas, hearts, scoreTitle, gameOver, tryAgain) {
 
   let interval = setInterval(
     () => intervalFunction(interval, engine, triangle, render.canvas.width),
-    2000,
+    defaultSpawnSpeed,
   );
+
+  let increasingSpeedInterval = setInterval(() => {
+    clearInterval(interval);
+    currentSpawnSpeed /= 1.2;
+
+    interval = setInterval(
+      () => intervalFunction(interval, engine, triangle, render.canvas.width),
+      currentSpawnSpeed,
+    );
+  }, 10000);
 
   Matter.Events.on(engine, 'collisionStart', ({ pairs }) => {
     pairs.forEach(({ bodyA, bodyB }) => {
@@ -106,9 +88,18 @@ function game(canvas, hearts, scoreTitle, gameOver, tryAgain) {
 
         if (!life) {
           gameOver.className = '';
+
+          if (score > highestScoreNumber || !highestScoreNumber) {
+            localStorage.setItem('highestScore', score);
+            highestScoreNumber = score;
+          }
+
+          highestScore.innerHTML = 'Your highest score: ' + highestScoreNumber;
         }
 
-        hearts[hearts.length - life - 1].className = 'heart hidden';
+        if (life > -1) {
+          hearts[hearts.length - life - 1].className = 'heart hidden';
+        }
 
         return;
       }
@@ -122,12 +113,16 @@ function game(canvas, hearts, scoreTitle, gameOver, tryAgain) {
       ) {
         if (bodyA != basket && bodyA != triangle) {
           Matter.World.remove(engine.world, bodyA);
+        } else {
+          Matter.World.remove(engine.world, bodyB);
         }
         if (bodyB != basket && bodyB != triangle) {
           Matter.World.remove(engine.world, bodyB);
         }
 
-        score += 1;
+        if (life > -1) {
+          score += 1;
+        }
 
         scoreTitle.innerHTML = 'Your score: ' + score;
       }
@@ -140,26 +135,100 @@ function game(canvas, hearts, scoreTitle, gameOver, tryAgain) {
   });
 
   window.addEventListener('touchmove', e => {
-    Body.setPosition(basket, Vector.create(e.touches[0].clientX, basket.position.y));
-    Body.setPosition(triangle, Vector.create(e.touches[0].clientX, basket.position.y));
+    Body.setPosition(
+      basket,
+      Vector.create(e.touches[0].clientX, basket.position.y),
+    );
+    Body.setPosition(
+      triangle,
+      Vector.create(e.touches[0].clientX, basket.position.y),
+    );
   });
 
   tryAgain.addEventListener('click', e => {
     score = 0;
     life = 5;
+    currentSpawnSpeed = defaultSpawnSpeed;
     [].forEach.call(hearts, heart => (heart.className = 'heart'));
     gameOver.className = 'hidden';
     scoreTitle.innerHTML = 'Your score: 0';
     interval = setInterval(
       () => intervalFunction(interval, engine, triangle, render.canvas.width),
-      2000,
+      defaultSpawnSpeed,
     );
   });
 
   window.addEventListener('resize', () => {
     render.canvas.height = window.innerHeight;
     render.canvas.width = window.innerWidth;
+
+    World.clear(engine.world);
+
+    const { groundObject, basketObject, triangleObject } = createBase(
+      render.canvas.height,
+      render.canvas.width,
+    );
+
+    ground = groundObject;
+    basket = basketObject;
+    triangle = triangleObject;
+
+    World.add(engine.world, [ground, basket, triangle]);
   });
+}
+
+function createBase(height, width) {
+  const drawHeight = height > width ? height * 0.9 : height;
+  const groundHeight = screen.height - drawHeight;
+
+  const groundObject = Bodies.rectangle(
+    width / 2,
+    drawHeight,
+    width,
+    groundHeight,
+    {
+      isStatic: true,
+    },
+  );
+
+  const basketObject = Bodies.fromVertices(
+    50,
+    drawHeight - groundHeight / 2,
+    [
+      Vector.create(30, 530),
+      Vector.create(32, 530),
+      Vector.create(46, 565),
+      Vector.create(54, 565),
+      Vector.create(68, 530),
+      Vector.create(70, 530),
+      Vector.create(55, 570),
+      Vector.create(45, 570),
+    ],
+    {
+      isStatic: true,
+    },
+  );
+
+  const triangleObject = Bodies.polygon(
+    50,
+    drawHeight - groundHeight / 2,
+    3,
+    10,
+    {
+      isStatic: true,
+      render: {
+        sprite: {
+          texture: '../static/img/basket.png',
+          xOffset: -0.17,
+          yOffset: -0.05,
+          xScale: 0.05,
+          yScale: 0.05,
+        },
+      },
+    },
+  );
+
+  return { groundObject, basketObject, triangleObject };
 }
 
 function intervalFunction(interval, engine, triangle, width) {
